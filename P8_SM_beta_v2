@@ -1,0 +1,140 @@
+import pandas as pd
+import numpy as np
+import glob
+
+
+#User INPUT: Senior/Senior+Junior ratio
+ratio           = 0.0 
+#User INPUT: Number of customer that day
+customer_num    = 0        
+#List for create TMs in. First:Senior, Second:Junior
+tm_list         = []            
+
+def profile():
+    '''
+    I/O: input junior and senior ratio and number of customers
+    (later adjust input for TM to choose given day vs ...)*
+    '''
+    customer_num = 1500 #input('Please enter a number of customers...')
+    ratio        = 0.7  #input('Please enter ratio (senior/junior+senior numbers)')
+    
+    TM()
+
+def TM():
+    '''
+    Reads/(later also can Creates)* TM DF as list
+    and creates location_matrix DF
+    
+    Triggers: opening()
+    '''
+    for filename in glob.glob('TMs/*.csv'):
+        data = pd.read_csv(filename)
+        tm_list.append(data)
+    
+    SM.opening()
+
+
+class SM:
+    def __init__(self, closing=900, time=0, visitor_per_min=2, visitor_der=1):
+        self.closing        = closing    # 900minutes(15h), 900 steps.
+        self.time           = time       # current time in a turn
+        self.total_visitors = np.random.normal(loc=visitor_per_min, scale=visitor_der, size=(0, self.time))
+
+        #this keeps number of senior and juniors at sections (time i)
+        self.location_matrix   = pd.DataFrame(columns=['senior', 'junior'], index=['dairy','drinks','fruit','spices','entry','checkout']).fillna(value=0)
+        #this keeps new number for locations (time i+1)
+        self.temp_location     = location_matrix.copy
+        #Before temp location is overwritten, it written in this data frame every turn
+        self.customer_record   = location_matrix.copy
+
+   --------------- def return_location():
+    ---------------    return self.location_matrix
+    
+    def opening():
+        '''
+        Check the shop is still open it start from 1 to closing hours (closing). 
+        
+        If shop closed (reach to closing number 900) go to close def
+        Triggers: incoming() or closing()
+        '''
+        while time <= self.closing:
+            time += 1
+            SM.incoming()
+        SM.closing()
+            
+    def incoming():
+        '''
+        Calculates from visiting_hours and customer_num, entering customers and send add_customers a float number 
+        
+        Triggers: add_customers()
+        '''
+        SM.add_customers(self.total_visitors[time])
+        
+    def add_customers(entering_customers):
+        '''
+        from ratio calculates arriving senior and junior customers and changes location_matrix DF entry columns.
+        
+        Triggers: move_senior()
+        '''
+        senior_num = round(entering_customers * ratio)
+        junior_num = entering_customers - senior_num
+        
+        location_matrix['senior'].loc['entry'] = senior_num
+        location_matrix['junior'].loc['entry'] = junior_num
+        
+        senior.move_junior()
+        
+    def record():
+        '''
+        records temp_location matrix on the right sight of customer_records DF.
+        
+        Triggers: remove_customers()
+        '''
+
+        self.customer_record = pd.concat(self.customer_record, axis=1)
+
+    def remove_customers():
+        '''
+        And copy temp_location DF to location_matrix to update new positions
+        removes all customers from temp_location DF.
+        
+        Triggers: opening()
+        '''
+
+        self.temp_location['checkout'] = 0
+        self.location_matrix = self.temp_location
+        self.temp_location['senior'] = 0
+        self.temp_location['junior'] = 0
+
+
+    def closing():
+        '''
+        As the name suggests. last calculations if its needed to order the gathered data.
+        '''
+        print('Market is closed!')
+
+    class senior():
+        def move_junior():   
+            '''
+            Take data from translition matrix. Go every position for seniors in matrix one by one. 
+            And depends on number in a cell (like there is 10 seniors at fruit section) make related 
+            transations and write moved seniors in temp_location.
+
+            Triggers: move_junior()    
+            '''
+           
+            for i, _ in enumerate(range(5)):
+                tm_df = tm_list[0].loc[i].          # Get related cell in tm matix first column is senior in tm_list. Choose section in row in order of:('dairy','drinks','fruit','spices','entry')
+                for k in range(location_matrix.iloc[i][0].values):
+                    np.random.choice([-4, -1, 0, 1, 4], p=[0.1, 0.3, 0.2, 0.2, 0.2])
+                 print(i)
+            #return np.random.choice([-4, -1, 0, 1, 4], p=[0.1, 0.3, 0.2, 0.2, 0.2])
+
+    class junior():
+        def move_junior():    
+          '''
+          Take data from translition matrix. Go every position for juniors in matrix one by one. 
+          And depends on number in a cell (like there is 10 juniors at fruit section) make related transations and write moved seniors in temp_location.
+
+          Triggers: record()    
+         '''
